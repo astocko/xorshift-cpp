@@ -43,11 +43,21 @@ int main() {
   std::cout << "Xoroshiro128: " << xoro.Next() << std::endl;
 
   // seed splitmix64 with timestamp and then seed xorshift1024 with splitmix64
-  auto seed = std::chrono::system_clock::now().time_since_epoch().count();
+  auto seed = now();
   auto xs1024 = xs::SeedWithSm64<xs::Xorshift1024>(seed);
   std::vector<uint64_t> vals(20);
   std::generate(vals.begin(), vals.end(),
                 [xs1024]() mutable {return xs1024.Next();});
   std::cout << "Xorshift1024: " << vals << std::endl;
+
+  // seed splitmix64 with same timestamp and then seed xorshift1024 and jump
+  auto xs1024_2 = xs::SeedWithSm64<xs::Xorshift1024>(seed);
+  xs1024_2.Jump();
+  std::generate(vals.begin(), vals.end(),
+                [xs1024_2]() mutable {return xs1024_2.Next();});
+  std::cout << "Xorshift1024_Jumped: " << vals << std::endl;
+
+
+
   return 0;
 }
